@@ -7,41 +7,41 @@ namespace assets
 {
 	extern "C"
 	{
-		extern uint8_t binary_bishop_black_png[] asm("_binary_bishop_black_png_start");
-		extern uint8_t binary_bishop_black_png_end[] asm("_binary_bishop_black_png_end");
+		extern uint8_t binary_bishop_black_png[] asm("_binary___assets_bishop_black_png_start");
+		extern uint8_t binary_bishop_black_png_end[] asm("_binary___assets_bishop_black_png_end");
 
-		extern uint8_t binary_bishop_white_png[] asm("_binary_bishop_white_png_start");
-		extern uint8_t binary_bishop_white_png_end[] asm("_binary_bishop_white_png_end");
+		extern uint8_t binary_bishop_white_png[] asm("_binary___assets_bishop_white_png_start");
+		extern uint8_t binary_bishop_white_png_end[] asm("_binary___assets_bishop_white_png_end");
 
-		extern uint8_t binary_king_black_png[] asm("_binary_king_black_png_start");
-		extern uint8_t binary_king_black_png_end[] asm("_binary_king_black_png_end");
+		extern uint8_t binary_king_black_png[] asm("_binary___assets_king_black_png_start");
+		extern uint8_t binary_king_black_png_end[] asm("_binary___assets_king_black_png_end");
 
-		extern uint8_t binary_king_white_png[] asm("_binary_king_white_png_start");
-		extern uint8_t binary_king_white_png_end[] asm("_binary_king_white_png_end");
+		extern uint8_t binary_king_white_png[] asm("_binary___assets_king_white_png_start");
+		extern uint8_t binary_king_white_png_end[] asm("_binary___assets_king_white_png_end");
 
-		extern uint8_t binary_knight_black_png[] asm("_binary_knight_black_png_start");
-		extern uint8_t binary_knight_black_png_end[] asm("_binary_knight_black_png_end");
+		extern uint8_t binary_knight_black_png[] asm("_binary___assets_knight_black_png_start");
+		extern uint8_t binary_knight_black_png_end[] asm("_binary___assets_knight_black_png_end");
 
-		extern uint8_t binary_knight_white_png[] asm("_binary_knight_white_png_start");
-		extern uint8_t binary_knight_white_png_end[] asm("_binary_knight_white_png_end");
+		extern uint8_t binary_knight_white_png[] asm("_binary___assets_knight_white_png_start");
+		extern uint8_t binary_knight_white_png_end[] asm("_binary___assets_knight_white_png_end");
 
-		extern uint8_t binary_pawn_black_png[] asm("_binary_pawn_black_png_start");
-		extern uint8_t binary_pawn_black_png_end[] asm("_binary_pawn_black_png_end");
+		extern uint8_t binary_pawn_black_png[] asm("_binary___assets_pawn_black_png_start");
+		extern uint8_t binary_pawn_black_png_end[] asm("_binary___assets_pawn_black_png_end");
 
-		extern uint8_t binary_pawn_white_png[] asm("_binary_pawn_white_png_start");
-		extern uint8_t binary_pawn_white_png_end[] asm("_binary_pawn_white_png_end");
+		extern uint8_t binary_pawn_white_png[] asm("_binary___assets_pawn_white_png_start");
+		extern uint8_t binary_pawn_white_png_end[] asm("_binary___assets_pawn_white_png_end");
 
-		extern uint8_t binary_queen_black_png[] asm("_binary_queen_black_png_start");
-		extern uint8_t binary_queen_black_png_end[] asm("_binary_queen_black_png_end");
+		extern uint8_t binary_queen_black_png[] asm("_binary___assets_queen_black_png_start");
+		extern uint8_t binary_queen_black_png_end[] asm("_binary___assets_queen_black_png_end");
 
-		extern uint8_t binary_queen_white_png[] asm("_binary_queen_white_png_start");
-		extern uint8_t binary_queen_white_png_end[] asm("_binary_queen_white_png_end");
+		extern uint8_t binary_queen_white_png[] asm("_binary___assets_queen_white_png_start");
+		extern uint8_t binary_queen_white_png_end[] asm("_binary___assets_queen_white_png_end");
 
-		extern uint8_t binary_rook_black_png[] asm("_binary_rook_black_png_start");
-		extern uint8_t binary_rook_black_png_end[] asm("_binary_rook_black_png_end");
+		extern uint8_t binary_rook_black_png[] asm("_binary___assets_rook_black_png_start");
+		extern uint8_t binary_rook_black_png_end[] asm("_binary___assets_rook_black_png_end");
 
-		extern uint8_t binary_rook_white_png[] asm("_binary_rook_white_png_start");
-		extern uint8_t binary_rook_white_png_end[] asm("_binary_rook_white_png_end");
+		extern uint8_t binary_rook_white_png[] asm("_binary___assets_rook_white_png_start");
+		extern uint8_t binary_rook_white_png_end[] asm("_binary___assets_rook_white_png_end");
 	}
 
 	/**
