@@ -5,18 +5,19 @@
 
 #include <SDL2/SDL.h>
 
+#include "assets.hh"
 #include "chess.hh"
 #include "gui.hh"
-
-using namespace chess;
 
 //
 // global state of the graphical interface
 //
 
-static Board mboard;
+static chess::Board mboard;
 static SDL_Window *window;
 static SDL_Renderer *renderer;
+
+static SDL_Texture *bishop_texture;
 
 //
 // SDL helpers (constants and functions)
@@ -93,18 +94,15 @@ void gui::begin()
 	}
 
 	// init sdl
-
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE)) {
 		fail_with_sdl_error();
 	}
 
 	// reset the Ctrl+C signal handler; don't let
 	// sdl capture it
-
 	signal(SIGINT, SIG_DFL);
 
 	// create the window
-
 	window = SDL_CreateWindow(
 		"lushin",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
@@ -116,10 +114,15 @@ void gui::begin()
 	}
 
 	// create the renderer
-
 	if (!(renderer = SDL_CreateRenderer(window, -1, 0))) {
 		fail_with_sdl_error();
 	}
+
+	// load in all assets into gpu memory
+	bishop_texture = assets::load_texture(
+		assets::binary_bishop_black_png,
+		assets::binary_bishop_black_png_end
+	);
 }
 
 void gui::update()
@@ -134,14 +137,38 @@ static void draw_background()
 
 	size_t cellid = 0;
 
-	for (uint8_t y = 0; y < 8; ++y) {
-		for (uint8_t x = 0; x < 8; ++x) {
+	for (uint8_t x = 0; x < 8; ++x) {
+		for (uint8_t y = 0; y < 8; ++y) {
 			const size_t idx = cellid++ % 2;
 			const SDL_Color &color = background_colors[idx];
 			draw_rectangle(x, y, color);
 		}
 
 		cellid += 1;
+	}
+}
+
+static void draw_piece_at(uint8_t x, uint8_t y)
+{
+	const chess::Piece &piece = mboard.at({x, y});
+
+
+	const SDL_Rect dstrect = {
+		x * CELL_DIM, y * CELL_DIM,
+		CELL_DIM, CELL_DIM
+	};
+
+	if (SDL_RenderCopy(renderer, bishop_texture, NULL, &dstrect)) {
+		fail_with_sdl_error();
+	}
+}
+
+static void draw_pieces()
+{
+	for (uint8_t x = 0; x < 8; ++x) {
+		for (uint8_t y = 0; y < 8; ++y) {
+			draw_piece_at(x, y);
+		}
 	}
 }
 
@@ -152,6 +179,7 @@ void gui::draw()
 	begin_drawing();
 
 	draw_background();
+	draw_pieces();
 
 	end_drawing();
 }

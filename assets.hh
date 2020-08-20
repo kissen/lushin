@@ -47,6 +47,8 @@ namespace assets
 	/**
 	 * Convert one of the staticly compiled PNG assets into an SDL
 	 * texture.
+	 *
+	 * Quits the program on errors.
 	 */
 	SDL_Texture *load_texture(uint8_t *startptr, uint8_t *endptr);
 }
