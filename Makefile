@@ -1,7 +1,8 @@
 CXXFLAGS += -std=c++17 -Wall -Wextra
 LDFLAGS += -lSDL2 -lSDL2_image
 
-objects = main.o piece.o pos.o kind.o color.o board.o
+objects = main.o piece.o pos.o kind.o color.o board.o \
+	valid_next_positions.o can_take_place_of.o
 
 all: lushin
 

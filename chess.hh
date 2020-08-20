@@ -140,6 +140,18 @@ namespace chess
 		// 8 x 8 board
 		std::vector<Piece> mboard;
 	};
+
+	/**
+	 * Return whether from can take the place of to.
+	 */
+	bool can_take_place_of(const Piece &from, const Piece &to);
+
+	/**
+	 * Return all positions the piece on position from can reach
+	 * within one turn. If from is not present, this method
+	 * returns an empty vector.
+	 */
+	std::vector<Pos> valid_next_positions(const Board &board, const Pos &from);
 };
 
 //

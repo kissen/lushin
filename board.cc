@@ -39,15 +39,6 @@ const Piece &Board::at(const Pos &pos) const
 	return this->mboard.at(idx);
 }
 
-static bool can_take_place_of(const Piece &from, const Piece &to)
-{
-	if (!to.present) {
-		return true;
-	}
-
-	return from.color != to.color;
-}
-
 std::optional<Piece> Board::move(const Pos &from, const Pos &to)
 {
 	const Piece capturer = this->at(from);
