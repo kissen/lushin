@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <SDL2/SDL.h>
 
 namespace gui
 {
@@ -24,4 +25,10 @@ namespace gui
 	 * execution returns right away without any delay.
 	 */
 	void delay(int8_t fps);
+
+	/**
+	 * Return a pointer to the renderer used by the graphical user
+	 * interface.
+	 */
+	SDL_Renderer *get_renderer();
 }

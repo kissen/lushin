@@ -41,7 +41,7 @@ static const SDL_Color SDL_WHITE = {
 static void fail_with_sdl_error(const char *funcname)
 {
 	const char *err = SDL_GetError();
-	fprintf(stderr, "lushin: gfx: %s: %s\n", funcname, err);
+	fprintf(stderr, "lushin: gui: %s: %s\n", funcname, err);
 	exit(EXIT_FAILURE);
 }
 
@@ -163,4 +163,11 @@ void gui::delay(int8_t fps)
 	}
 
 	// todo
+}
+
+// this sucks
+SDL_Renderer *gui::get_renderer()
+{
+	assert(renderer);
+	return renderer;
 }
