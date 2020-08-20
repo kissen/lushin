@@ -11,5 +11,6 @@ int main()
 	while (true) {
 		gui::update();
 		gui::draw();
+		gui::delay(60);
 	}
 }

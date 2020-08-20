@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <climits>
 #include <cstdio>
 #include <iostream>
 #include <signal.h>
@@ -25,6 +26,8 @@ static SDL_Texture *textures[2][6];
 //
 
 static chess::Board mboard;
+
+static uint32_t mticks;
 
 static struct {
 	int x;
@@ -233,6 +236,11 @@ void gui::begin()
 	mboard = chess::Board::initial();
 }
 
+static void update_time()
+{
+	mticks = SDL_GetTicks();
+}
+
 static void update_mouse_position()
 {
 	const uint32_t mstate = SDL_GetMouseState(&mmouse.x, &mmouse.y);
@@ -284,10 +292,10 @@ static void update_selection()
 void gui::update()
 {
 	SDL_PumpEvents();
+
+	update_time();
 	update_mouse_position();
 	update_selection();
-
-	printf("%d:%d\n", mmouse.x, mmouse.y);
 }
 
 static void draw_background()
@@ -375,7 +383,13 @@ void gui::delay(int8_t fps)
 		return;
 	}
 
-	// todo
+	const int64_t ideal_delay = int64_t(1000) / static_cast<int64_t>(fps);
+	const int64_t actual_delay = ideal_delay - (static_cast<int64_t>(SDL_GetTicks()) - static_cast<int64_t>(mticks));
+
+	if (actual_delay > 0 && actual_delay < UINT32_MAX) {
+		const uint32_t actual_delay32 = static_cast<uint32_t>(actual_delay);
+		SDL_Delay(actual_delay32);
+	}
 }
 
 // this sucks
