@@ -18,7 +18,7 @@ static chess::Board mboard;
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
-static SDL_Texture *textures[2][8];
+static SDL_Texture *textures[2][6];
 
 //
 // SDL helpers (constants and functions)
@@ -117,6 +117,10 @@ static void load_static_textures()
 		binary_queen_black_png, binary_queen_black_png_end
 	);
 
+	*texture_ref_for(Color::Black, Kind::Rook) = load_texture(
+		binary_rook_black_png, binary_rook_black_png_end
+	);
+
 	*texture_ref_for(Color::Black, Kind::Knight) = load_texture(
 		binary_knight_black_png, binary_knight_black_png_end
 	);
@@ -137,6 +141,10 @@ static void load_static_textures()
 		binary_queen_white_png, binary_queen_white_png_end
 	);
 
+	*texture_ref_for(Color::White, Kind::Rook) = load_texture(
+		binary_rook_white_png, binary_rook_white_png_end
+	);
+
 	*texture_ref_for(Color::White, Kind::Knight) = load_texture(
 		binary_knight_white_png, binary_knight_white_png_end
 	);
@@ -152,9 +160,7 @@ static void load_static_textures()
 
 void gui::begin()
 {
-	if (window) {
-		return;
-	}
+	assert(!window);
 
 	// init sdl
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE)) {
@@ -183,6 +189,9 @@ void gui::begin()
 
 	// load in all assets into gpu memory
 	load_static_textures();
+
+	// init game state
+	mboard = chess::Board::initial();
 }
 
 void gui::update()
@@ -213,7 +222,7 @@ static void draw_piece_at(uint8_t x, uint8_t y)
 	const chess::Piece &piece = mboard.at({x, y});
 
 	if (!piece.present) {
-		//return;
+		return;
 	}
 
 	SDL_Texture *texture = texture_for(piece.color, piece.kind);

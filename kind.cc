@@ -1,5 +1,6 @@
 #include "chess.hh"
 
+#include <iostream>
 #include <stdexcept>
 
 using namespace chess;
