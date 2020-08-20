@@ -14,11 +14,24 @@
 // global state of the graphical interface
 //
 
-static chess::Board mboard;
-
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 static SDL_Texture *textures[2][6];
+
+//
+// state that gets written in update() and read in draw()
+//
+
+static chess::Board mboard;
+
+static struct {
+	int x;
+	int y;
+	bool left_down;
+	bool right_down;
+	bool left_clicked;
+	bool right_clicked;
+} mmouse;
 
 //
 // SDL helpers (constants and functions)
@@ -27,17 +40,15 @@ static SDL_Texture *textures[2][6];
 #define CELL_DIM 64
 
 static const SDL_Color SDL_BLACK = {
-	0,
-	0,
-	0,
-	255
+	0x00, 0x00, 0x00, 0xff
 };
 
 static const SDL_Color SDL_WHITE = {
-	255,
-	255,
-	255,
-	255
+	0xff, 0xff, 0xff, 0xff
+};
+
+static const SDL_Color SDL_HIGHLIGHT = {
+	0xff, 0xf7, 0x7a, 0xff
 };
 
 static void fail_with_sdl_error(const char *funcname)
@@ -82,6 +93,23 @@ static void draw_rectangle(uint8_t x, uint8_t y, const SDL_Color &color)
 	if (SDL_RenderFillRect(renderer, &rectangle)) {
 		fail_with_sdl_error();
 	}
+}
+
+static SDL_Color blend_average(const SDL_Color &color0, const SDL_Color &color1)
+{
+	const uint16_t r = static_cast<uint16_t>(color0.r) + static_cast<uint16_t>(color1.r);
+	const uint16_t g = static_cast<uint16_t>(color0.g) + static_cast<uint16_t>(color1.g);
+	const uint16_t b = static_cast<uint16_t>(color0.b) + static_cast<uint16_t>(color1.b);
+	const uint16_t a = static_cast<uint16_t>(color0.a) + static_cast<uint16_t>(color1.a);
+
+	const uint8_t rfixed = static_cast<uint8_t>(r / 2);
+	const uint8_t gfixed = static_cast<uint8_t>(g / 2);
+	const uint8_t bfixed = static_cast<uint8_t>(b / 2);
+	const uint8_t afixed = static_cast<uint8_t>(a / 2);
+
+	return SDL_Color{
+		rfixed, gfixed, bfixed, afixed
+	};
 }
 
 //
@@ -194,8 +222,34 @@ void gui::begin()
 	mboard = chess::Board::initial();
 }
 
+static void update_mouse()
+{
+	const uint32_t mstate = SDL_GetMouseState(&mmouse.x, &mmouse.y);
+
+	const bool left_was_down = mmouse.left_down;
+	const bool right_was_down = mmouse.right_down;
+
+	mmouse.left_down = mstate & SDL_BUTTON(1);
+	mmouse.right_down = mstate & SDL_BUTTON(3);
+
+	mmouse.left_clicked = left_was_down && (! mmouse.left_down);
+	mmouse.right_clicked = right_was_down && (! mmouse.right_down);
+}
+
+static chess::Pos mouse_selection()
+{
+	const uint8_t xscaled = mmouse.x / CELL_DIM;
+	const uint8_t yscaled = mmouse.y / CELL_DIM;
+
+	return {xscaled, yscaled};
+}
+
 void gui::update()
 {
+	SDL_PumpEvents();
+	update_mouse();
+
+	printf("%d:%d\n", mmouse.x, mmouse.y);
 }
 
 static void draw_background()
@@ -204,12 +258,18 @@ static void draw_background()
 		SDL_WHITE, SDL_BLACK
 	};
 
+	const chess::Pos highlight = mouse_selection();
 	size_t cellid = 0;
 
 	for (uint8_t x = 0; x < 8; ++x) {
 		for (uint8_t y = 0; y < 8; ++y) {
 			const size_t idx = cellid++ % 2;
-			const SDL_Color &color = background_colors[idx];
+			SDL_Color color = background_colors[idx];
+
+			if (highlight.x == x && highlight.y == y) {
+				color = blend_average(color, SDL_HIGHLIGHT);
+			}
+
 			draw_rectangle(x, y, color);
 		}
 
