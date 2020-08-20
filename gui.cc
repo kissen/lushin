@@ -1,8 +1,10 @@
+#include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <iostream>
 #include <signal.h>
 #include <stdexcept>
+#include <vector>
 
 #include <SDL2/SDL.h>
 
@@ -32,6 +34,15 @@ static struct {
 	bool left_clicked;
 	bool right_clicked;
 } mmouse;
+
+/* Currently selected position in board coordinates. Might be nullptr. */
+static const chess::Pos *m_selected_pos;
+
+/* Currently selected piece. Might be nullptr. */
+static const chess::Piece *m_selected_piece;
+
+/* Supported next moves for m_selected_piece. Might be nulltpr. */
+static const std::vector<chess::Pos> *m_valid_next_moves_for_selected;
 
 //
 // SDL helpers (constants and functions)
@@ -107,7 +118,7 @@ static SDL_Color blend_average(const SDL_Color &color0, const SDL_Color &color1)
 	const uint8_t bfixed = static_cast<uint8_t>(b / 2);
 	const uint8_t afixed = static_cast<uint8_t>(a / 2);
 
-	return SDL_Color{
+	return SDL_Color {
 		rfixed, gfixed, bfixed, afixed
 	};
 }
@@ -222,7 +233,7 @@ void gui::begin()
 	mboard = chess::Board::initial();
 }
 
-static void update_mouse()
+static void update_mouse_position()
 {
 	const uint32_t mstate = SDL_GetMouseState(&mmouse.x, &mmouse.y);
 
@@ -244,10 +255,37 @@ static chess::Pos mouse_selection()
 	return {xscaled, yscaled};
 }
 
+static void update_selection()
+{
+	static chess::Pos current_selection;
+
+	current_selection = mouse_selection();
+	m_selected_pos = &current_selection;
+
+	const chess::Piece piece = mboard.at(current_selection);
+
+	// if piece not present, no suggestions
+
+	if (!piece.present) {
+		m_selected_piece = nullptr;
+		m_valid_next_moves_for_selected = nullptr;
+		return;
+	}
+
+	// if an actual piece is suggested, highlight suggestions
+
+	static std::vector<chess::Pos> next_moves;
+
+	m_selected_piece = &piece;
+	next_moves = chess::valid_next_positions(mboard, current_selection);
+	m_valid_next_moves_for_selected = &next_moves;
+}
+
 void gui::update()
 {
 	SDL_PumpEvents();
-	update_mouse();
+	update_mouse_position();
+	update_selection();
 
 	printf("%d:%d\n", mmouse.x, mmouse.y);
 }
@@ -258,7 +296,6 @@ static void draw_background()
 		SDL_WHITE, SDL_BLACK
 	};
 
-	const chess::Pos highlight = mouse_selection();
 	size_t cellid = 0;
 
 	for (uint8_t x = 0; x < 8; ++x) {
@@ -266,7 +303,21 @@ static void draw_background()
 			const size_t idx = cellid++ % 2;
 			SDL_Color color = background_colors[idx];
 
-			if (highlight.x == x && highlight.y == y) {
+			const chess::Pos xy = {x, y};
+			bool requires_highlight = false;
+
+			if (m_selected_pos && *m_selected_pos == xy) {
+				requires_highlight = true;
+			}
+
+			if (m_valid_next_moves_for_selected) {
+				const auto &moves = *m_valid_next_moves_for_selected;
+				if (std::find(begin(moves), end(moves), xy) != end(moves)) {
+					requires_highlight =  true;
+				}
+			}
+
+			if (requires_highlight) {
 				color = blend_average(color, SDL_HIGHLIGHT);
 			}
 

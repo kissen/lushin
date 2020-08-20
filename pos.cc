@@ -14,6 +14,16 @@ Pos::Pos(int x, int y) : x(static_cast<int8_t>(x)), y(static_cast<int8_t>(y))
 {
 }
 
+bool Pos::operator==(const Pos &other) const
+{
+	return this->x == other.x && this->y == other.y;
+}
+
+bool Pos::operator!=(const Pos &other) const
+{
+	return !(*this == other);
+}
+
 Pos Pos::operator+(const Pos &other) const
 {
 	const int8_t x = this->x + other.x;

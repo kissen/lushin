@@ -81,6 +81,16 @@ namespace chess
 		Pos(int x, int y);
 
 		/**
+		 * Equality check.
+		 */
+		bool operator==(const Pos &other) const;
+
+		/**
+		 * Unequality check.
+		 */
+		bool operator!=(const Pos &other) const;
+
+		/**
 		 * Pairwise addition of two Pos.
 		 */
 		Pos operator+(const Pos &other) const;
