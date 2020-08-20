@@ -1,4 +1,4 @@
-CXXFLAGS += -std=c++17 -Wall -Wextra
+CXXFLAGS += -std=c++17 -Wall -Wextra -g
 LDFLAGS += -lSDL2 -lSDL2_image
 
 objects = main.o piece.o pos.o kind.o color.o board.o \

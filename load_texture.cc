@@ -1,5 +1,6 @@
 #include <cassert>
 #include <climits>
+#include <cstddef>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -14,7 +15,7 @@
 static void fail_with_sdl_error(const char *funcname)
 {
 	const char *err = SDL_GetError();
-	fprintf(stderr, "lushin: gui: %s: %s\n", funcname, err);
+	fprintf(stderr, "lushin: sdl_image: %s: %s\n", funcname, err);
 	exit(EXIT_FAILURE);
 }
 
@@ -33,25 +34,45 @@ static void fail_with_img_error(const char *funcname)
 // Implementation
 //
 
-SDL_Texture *assets::load_texture(void *startptr, void *sizeptr)
+/**
+ * Return difference between start and end in bytes.
+ */
+static size_t diff_between(const uint8_t *start, const uint8_t *end)
+{
+	assert(end >= start);
+
+	ptrdiff_t diff = end - start;
+	return diff;
+}
+
+/**
+ * Return difference between start and end in bytes.
+ */
+static int int_diff_between(const uint8_t *start, const uint8_t *end)
+{
+	const size_t size = diff_between(start, end);
+	assert(size > 0);
+	assert(size < INT_MAX);
+
+	return static_cast<int>(size);
+}
+
+SDL_Texture *assets::load_texture(uint8_t *startptr, uint8_t *endptr)
 {
 	assert(startptr);
-	assert(sizeptr);
+	assert(endptr);
 
 	// init the subsystem, make sure we have PNG support
 	if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
 		fail_with_img_error();
 	}
 
-	// get the size; this is ugly and I hope it works UwU
-	const size_t size = *reinterpret_cast<size_t*>(sizeptr);
-	assert(size > 0);
-	assert(size < INT_MAX);
-	const int int_size = static_cast<int>(size);
+	// get the size
+	const int asset_size = int_diff_between(startptr, endptr);
 
 	// mmap the in-memory asset
 	SDL_RWops *rwop;
-	if (!(rwop = SDL_RWFromMem(startptr, int_size))) {
+	if (!(rwop = SDL_RWFromMem(startptr, asset_size))) {
 		fail_with_sdl_error();
 	}
 
