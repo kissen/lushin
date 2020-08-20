@@ -1,7 +1,8 @@
 #include <cassert>
-#include <iostream>
 #include <cstdio>
+#include <iostream>
 #include <signal.h>
+#include <stdexcept>
 
 #include <SDL2/SDL.h>
 
@@ -14,10 +15,10 @@
 //
 
 static chess::Board mboard;
+
 static SDL_Window *window;
 static SDL_Renderer *renderer;
-
-static SDL_Texture *bishop_texture;
+static SDL_Texture *textures[2][8];
 
 //
 // SDL helpers (constants and functions)
@@ -87,6 +88,68 @@ static void draw_rectangle(uint8_t x, uint8_t y, const SDL_Color &color)
 // implementation of gui.hh functions
 //
 
+static SDL_Texture *texture_for(chess::Color color, chess::Kind kind)
+{
+	const size_t idx0 = static_cast<size_t>(color);
+	const size_t idx1 = static_cast<size_t>(kind);
+
+	return textures[idx0][idx1];
+}
+
+static SDL_Texture **texture_ref_for(chess::Color color, chess::Kind kind)
+{
+	const size_t idx0 = static_cast<size_t>(color);
+	const size_t idx1 = static_cast<size_t>(kind);
+
+	return &textures[idx0][idx1];
+}
+
+static void load_static_textures()
+{
+	using namespace assets;
+	using namespace chess;
+
+	*texture_ref_for(Color::Black, Kind::King) = load_texture(
+		binary_king_black_png, binary_king_black_png_end
+	);
+
+	*texture_ref_for(Color::Black, Kind::Queen) = load_texture(
+		binary_queen_black_png, binary_queen_black_png_end
+	);
+
+	*texture_ref_for(Color::Black, Kind::Knight) = load_texture(
+		binary_knight_black_png, binary_knight_black_png_end
+	);
+
+	*texture_ref_for(Color::Black, Kind::Bishop) = load_texture(
+		binary_bishop_black_png, binary_bishop_black_png_end
+	);
+
+	*texture_ref_for(Color::Black, Kind::Pawn) = load_texture(
+		binary_pawn_black_png, binary_pawn_black_png_end
+	);
+
+	*texture_ref_for(Color::White, Kind::King) = load_texture(
+		binary_king_white_png, binary_king_white_png_end
+	);
+
+	*texture_ref_for(Color::White, Kind::Queen) = load_texture(
+		binary_queen_white_png, binary_queen_white_png_end
+	);
+
+	*texture_ref_for(Color::White, Kind::Knight) = load_texture(
+		binary_knight_white_png, binary_knight_white_png_end
+	);
+
+	*texture_ref_for(Color::White, Kind::Bishop) = load_texture(
+		binary_bishop_white_png, binary_bishop_white_png_end
+	);
+
+	*texture_ref_for(Color::White, Kind::Pawn) = load_texture(
+		binary_pawn_white_png, binary_pawn_white_png_end
+	);
+}
+
 void gui::begin()
 {
 	if (window) {
@@ -119,10 +182,7 @@ void gui::begin()
 	}
 
 	// load in all assets into gpu memory
-	bishop_texture = assets::load_texture(
-		assets::binary_bishop_black_png,
-		assets::binary_bishop_black_png_end
-	);
+	load_static_textures();
 }
 
 void gui::update()
@@ -152,13 +212,18 @@ static void draw_piece_at(uint8_t x, uint8_t y)
 {
 	const chess::Piece &piece = mboard.at({x, y});
 
+	if (!piece.present) {
+		//return;
+	}
+
+	SDL_Texture *texture = texture_for(piece.color, piece.kind);
 
 	const SDL_Rect dstrect = {
 		x * CELL_DIM, y * CELL_DIM,
 		CELL_DIM, CELL_DIM
 	};
 
-	if (SDL_RenderCopy(renderer, bishop_texture, NULL, &dstrect)) {
+	if (SDL_RenderCopy(renderer, texture, NULL, &dstrect)) {
 		fail_with_sdl_error();
 	}
 }

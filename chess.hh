@@ -11,23 +11,23 @@ namespace chess
 	 * The color or team association of a piece, that is
 	 * either black or white.
 	 */
-	enum class Color
+	enum class Color : uint8_t
 	{
-		Black,
-		White
+		Black = 0,
+		White = 1
 	};
 
 	/**
 	 * The kind of family of a piece, e.g. King or Rook.
 	 */
-	enum class Kind
+	enum class Kind : uint8_t
 	{
-		King,
-		Queen,
-		Rook,
-		Bishop,
-		Knight,
-		Pawn,
+		King = 0,
+		Queen = 1,
+		Rook = 2,
+		Bishop = 3,
+		Knight = 4,
+		Pawn = 5,
 	};
 
 	/**
