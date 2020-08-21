@@ -282,10 +282,21 @@ static chess::Pos mouse_selection()
 static void update_selection()
 {
 	static chess::Pos current_selection_buf;
-	const chess::Pos frame_mouse_selection = mouse_selection();
 
 	if (!m_mouse.left_clicked) {
 		return;
+	}
+
+	const chess::Pos frame_mouse_selection = mouse_selection();
+	const bool checked = chess::is_checked(m_board, m_current_player);
+	const bool check_mated = chess::is_check_mated(m_board, m_current_player);
+
+	if (checked) {
+		std::cout << "check!" << std::endl;
+	}
+
+	if (check_mated) {
+		std::cout << "checkmate!" << std::endl;
 	}
 
 	if (m_selected_pos) {
