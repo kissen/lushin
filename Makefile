@@ -3,7 +3,7 @@ LDFLAGS += -lSDL2 -lSDL2_image
 
 objects = main.o piece.o pos.o kind.o color.o board.o \
 	valid_next_positions.o can_take_place_of.o gui.o \
-	assets.o load_texture.o
+	assets.o load_texture.o is_checked.o is_check_mated.o
 
 assets = $(wildcard ./assets/*.png)
 

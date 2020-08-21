@@ -192,6 +192,24 @@ namespace chess
 	 * returns an empty vector.
 	 */
 	std::vector<Pos> valid_next_positions(const Board &board, const Pos &from);
+
+	/**
+	 * Return wheter board is in a state of "checked" when it is
+	 * current_players turn.
+	 *
+	 * If this function returns true, then current_player has to
+	 * make a move to protect their king.
+	 */
+	bool is_checked(const Board &board, Color current_player);
+
+	/**
+	 * Return wheter board is in a state of "checkmate" when it is
+	 * current_players turn.
+	 *
+	 * If this function returns true, then current_player has lost
+	 * the game.
+	 */
+	bool is_check_mated(const Board &board, Color current_player);
 };
 
 //
