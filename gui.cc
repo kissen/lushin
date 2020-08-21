@@ -25,10 +25,16 @@ static SDL_Texture *textures[2][6];
 // state that gets written in update() and read in draw()
 //
 
-static chess::Board mboard;
+/* state of the game to display */
+static chess::Board m_board;
 
-static uint32_t mticks;
+/* number of the frame currently being rendered */
+static uint32_t m_frame;
 
+/* ticks in ms since the start of the game */
+static uint32_t m_ticks;
+
+/* mouse state for the current frame */
 static struct {
 	int x;
 	int y;
@@ -36,16 +42,19 @@ static struct {
 	bool right_down;
 	bool left_clicked;
 	bool right_clicked;
-} mmouse;
+} m_mouse;
 
-/* Currently selected position in board coordinates. Might be nullptr. */
+/* currently selected position in board coordinates, might be nullptr */
+static const chess::Pos *m_hovered_pos;
+
+/* currently selected piece, might be nullptr */
+static const chess::Piece *m_hovered_piece;
+
+/* supported next moves for m_hovered_piece, might be nulltpr */
+static const std::vector<chess::Pos> *m_valid_next_moves_for_hovered;
+
+/* currently clicked on cell, might be null */
 static const chess::Pos *m_selected_pos;
-
-/* Currently selected piece. Might be nullptr. */
-static const chess::Piece *m_selected_piece;
-
-/* Supported next moves for m_selected_piece. Might be nulltpr. */
-static const std::vector<chess::Pos> *m_valid_next_moves_for_selected;
 
 //
 // SDL helpers (constants and functions)
@@ -63,6 +72,10 @@ static const SDL_Color SDL_WHITE = {
 
 static const SDL_Color SDL_HIGHLIGHT = {
 	0xff, 0xf7, 0x7a, 0xff
+};
+
+static const SDL_Color SDL_SELECTION = {
+	0xff, 0x00, 0x00, 0xff
 };
 
 static void fail_with_sdl_error(const char *funcname)
@@ -95,7 +108,7 @@ static void end_drawing()
 	SDL_RenderPresent(renderer);
 }
 
-static void draw_rectangle(uint8_t x, uint8_t y, const SDL_Color &color)
+static void draw_filled_rectangle(uint8_t x, uint8_t y, const SDL_Color &color)
 {
 	const SDL_Rect rectangle = {
 		x * CELL_DIM, y * CELL_DIM,
@@ -105,6 +118,20 @@ static void draw_rectangle(uint8_t x, uint8_t y, const SDL_Color &color)
 	set_render_color(color);
 
 	if (SDL_RenderFillRect(renderer, &rectangle)) {
+		fail_with_sdl_error();
+	}
+}
+
+static void draw_rectangle(uint8_t x, uint8_t y, const SDL_Color &color)
+{
+	const SDL_Rect rectangle = {
+		x * CELL_DIM, y * CELL_DIM,
+		CELL_DIM, CELL_DIM
+	};
+
+	set_render_color(color);
+
+	if (SDL_RenderDrawRect(renderer, &rectangle)) {
 		fail_with_sdl_error();
 	}
 }
@@ -233,60 +260,105 @@ void gui::begin()
 	load_static_textures();
 
 	// init game state
-	mboard = chess::Board::initial();
+	m_board = chess::Board::initial();
 }
 
 static void update_time()
 {
-	mticks = SDL_GetTicks();
+	m_frame += 1;
+	m_ticks = SDL_GetTicks();
 }
 
 static void update_mouse_position()
 {
-	const uint32_t mstate = SDL_GetMouseState(&mmouse.x, &mmouse.y);
+	const uint32_t mstate = SDL_GetMouseState(&m_mouse.x, &m_mouse.y);
 
-	const bool left_was_down = mmouse.left_down;
-	const bool right_was_down = mmouse.right_down;
+	const bool left_was_down = m_mouse.left_down;
+	const bool right_was_down = m_mouse.right_down;
 
-	mmouse.left_down = mstate & SDL_BUTTON(1);
-	mmouse.right_down = mstate & SDL_BUTTON(3);
+	m_mouse.left_down = mstate & SDL_BUTTON(1);
+	m_mouse.right_down = mstate & SDL_BUTTON(3);
 
-	mmouse.left_clicked = left_was_down && (! mmouse.left_down);
-	mmouse.right_clicked = right_was_down && (! mmouse.right_down);
+	m_mouse.left_clicked = left_was_down && (! m_mouse.left_down);
+	m_mouse.right_clicked = right_was_down && (! m_mouse.right_down);
 }
 
 static chess::Pos mouse_selection()
 {
-	const uint8_t xscaled = mmouse.x / CELL_DIM;
-	const uint8_t yscaled = mmouse.y / CELL_DIM;
+	const uint8_t xscaled = m_mouse.x / CELL_DIM;
+	const uint8_t yscaled = m_mouse.y / CELL_DIM;
 
 	return {xscaled, yscaled};
 }
 
 static void update_selection()
 {
-	static chess::Pos current_selection;
+	static chess::Pos current_selection_buf;
+	const chess::Pos frame_mouse_selection = mouse_selection();
 
-	current_selection = mouse_selection();
-	m_selected_pos = &current_selection;
-
-	const chess::Piece piece = mboard.at(current_selection);
-
-	// if piece not present, no suggestions
-
-	if (!piece.present) {
-		m_selected_piece = nullptr;
-		m_valid_next_moves_for_selected = nullptr;
+	if (!m_mouse.left_clicked) {
 		return;
 	}
 
-	// if an actual piece is suggested, highlight suggestions
+	if (m_selected_pos) {
+		const auto &from = *m_selected_pos;
+		const auto &to = frame_mouse_selection;
+
+		const auto allowed = chess::valid_next_positions(m_board, from);
+		if (std::find(begin(allowed), end(allowed), to) != end(allowed)) {
+			std::optional<chess::Piece> thrown = m_board.move(from, to);
+			if (thrown) {
+				std::cout << "removed " << *thrown << std::endl;
+			}
+		}
+
+		m_selected_pos = nullptr;
+	} else {
+		assert(!m_selected_pos);
+
+		const chess::Piece &frame_piece_selection = m_board.at(frame_mouse_selection);
+
+		if (!frame_piece_selection.present) {
+			return;
+		}
+
+		current_selection_buf = frame_mouse_selection;
+		m_selected_pos = &current_selection_buf;
+	}
+}
+
+static void update_hovered()
+{
+	// find out the cell and piece which is the focus/source of
+	// the hover effect
+
+	static chess::Pos current_hover;
+
+	if (m_selected_pos) {
+		current_hover = *m_selected_pos;
+		m_hovered_pos = &current_hover;
+	} else {
+		current_hover = mouse_selection();
+		m_hovered_pos = &current_hover;
+	}
+
+	// if piece not present, no suggestions
+
+	const chess::Piece &piece = m_board.at(current_hover);
+
+	if (!piece.present) {
+		m_hovered_piece = nullptr;
+		m_valid_next_moves_for_hovered = nullptr;
+		return;
+	}
+
+	// if an actual piece is present, highlight suggestions
 
 	static std::vector<chess::Pos> next_moves;
 
-	m_selected_piece = &piece;
-	next_moves = chess::valid_next_positions(mboard, current_selection);
-	m_valid_next_moves_for_selected = &next_moves;
+	m_hovered_piece = &piece;
+	next_moves = chess::valid_next_positions(m_board, current_hover);
+	m_valid_next_moves_for_hovered = &next_moves;
 }
 
 void gui::update()
@@ -296,6 +368,7 @@ void gui::update()
 	update_time();
 	update_mouse_position();
 	update_selection();
+	update_hovered();
 }
 
 static void draw_background()
@@ -306,30 +379,43 @@ static void draw_background()
 
 	size_t cellid = 0;
 
-	for (uint8_t x = 0; x < 8; ++x) {
+		for (uint8_t x = 0; x < 8; ++x) {
 		for (uint8_t y = 0; y < 8; ++y) {
 			const size_t idx = cellid++ % 2;
 			SDL_Color color = background_colors[idx];
 
 			const chess::Pos xy = {x, y};
 			bool requires_highlight = false;
+			bool requires_selection = false;
 
-			if (m_selected_pos && *m_selected_pos == xy) {
+			if (m_hovered_pos && *m_hovered_pos == xy) {
 				requires_highlight = true;
 			}
 
-			if (m_valid_next_moves_for_selected) {
-				const auto &moves = *m_valid_next_moves_for_selected;
+			if (m_valid_next_moves_for_hovered) {
+				const auto &moves = *m_valid_next_moves_for_hovered;
 				if (std::find(begin(moves), end(moves), xy) != end(moves)) {
 					requires_highlight =  true;
 				}
+			}
+
+			if (m_selected_pos && *m_selected_pos == xy) {
+				requires_selection = true;
 			}
 
 			if (requires_highlight) {
 				color = blend_average(color, SDL_HIGHLIGHT);
 			}
 
-			draw_rectangle(x, y, color);
+			// actual drawing
+
+			draw_filled_rectangle(x, y, color);
+
+			if (requires_selection) {
+				if ((m_ticks / 250) % 2) {
+					draw_rectangle(x, y, SDL_SELECTION);
+				}
+			}
 		}
 
 		cellid += 1;
@@ -338,7 +424,7 @@ static void draw_background()
 
 static void draw_piece_at(uint8_t x, uint8_t y)
 {
-	const chess::Piece &piece = mboard.at({x, y});
+	const chess::Piece &piece = m_board.at({x, y});
 
 	if (!piece.present) {
 		return;
@@ -384,7 +470,7 @@ void gui::delay(int8_t fps)
 	}
 
 	const int64_t ideal_delay = int64_t(1000) / static_cast<int64_t>(fps);
-	const int64_t actual_delay = ideal_delay - (static_cast<int64_t>(SDL_GetTicks()) - static_cast<int64_t>(mticks));
+	const int64_t actual_delay = ideal_delay - (static_cast<int64_t>(SDL_GetTicks()) - static_cast<int64_t>(m_ticks));
 
 	if (actual_delay > 0 && actual_delay < UINT32_MAX) {
 		const uint32_t actual_delay32 = static_cast<uint32_t>(actual_delay);

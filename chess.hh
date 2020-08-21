@@ -42,10 +42,25 @@ namespace chess
 		bool present;
 
 		/**
+		 * Copy constructor.
+		 */
+		Piece(const Piece &other);
+
+		/**
 		 * Construct a new piece with given color, kind and
 		 * present flag.
 		 */
 		Piece(Color color, Kind kind, bool present=true);
+
+		/**
+		 * Destructor for rule of three.
+		 */
+		~Piece();
+
+		/**
+		 * Assignment operator.
+		 */
+		Piece &operator=(const Piece &other);
 
 		/**
 		 * Return a piece that is not present.
@@ -69,6 +84,11 @@ namespace chess
 		Pos();
 
 		/**
+		 * Copy constructor.
+		 */
+		Pos(const Pos &other);
+
+		/**
 		 * Create a new Pos. It is your responsiblity that
 		 * x and y are in [0, 7].
 		 */
@@ -79,6 +99,16 @@ namespace chess
 		 * x and y are in [0, 7].
 		 */
 		Pos(int x, int y);
+
+		/**
+		 * Destructore for rule of three.
+		 */
+		~Pos();
+
+		/**
+		 * Assignment.
+		 */
+		Pos &operator=(const Pos &other);
 
 		/**
 		 * Equality check.

@@ -6,12 +6,27 @@ Pos::Pos() : x(0), y(0)
 {
 }
 
+Pos::Pos(const Pos &other) : x(other.x), y(other.y)
+{
+}
+
 Pos::Pos(int8_t x, int8_t y) : x(x), y(y)
 {
 }
 
 Pos::Pos(int x, int y) : x(static_cast<int8_t>(x)), y(static_cast<int8_t>(y))
 {
+}
+
+Pos::~Pos()
+{
+}
+
+Pos &Pos::operator=(const Pos &other)
+{
+	this->x = other.x;
+	this->y = other.y;
+	return *this;
 }
 
 bool Pos::operator==(const Pos &other) const
