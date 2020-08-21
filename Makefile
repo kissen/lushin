@@ -5,7 +5,7 @@ objects = main.o piece.o pos.o kind.o color.o board.o \
 	valid_next_positions.o can_take_place_of.o gui.o \
 	assets.o load_texture.o is_checked.o is_check_mated.o \
 	valid_next_boards.o choice.o best_next_board.o \
-	score.o
+	score.o current_millis.o
 
 assets = $(wildcard ./assets/*.png)
 
