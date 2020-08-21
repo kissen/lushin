@@ -1,7 +1,7 @@
-#include "chess.hh"
-
 #include <iostream>
 #include <stdexcept>
+
+#include "chess.hh"
 
 using namespace chess;
 
