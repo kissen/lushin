@@ -7,6 +7,8 @@ using namespace chess;
 static int absolute_score_piece(const Piece &piece)
 {
 	switch (piece.kind) {
+	case Kind::King:
+		return 18;
 	case Kind::Queen:
 		return 9;
 	case Kind::Rook:

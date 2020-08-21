@@ -288,16 +288,6 @@ static void update_selection()
 	}
 
 	const chess::Pos frame_mouse_selection = mouse_selection();
-	const bool checked = chess::is_checked(m_board, m_current_player);
-	const bool check_mated = chess::is_check_mated(m_board, m_current_player);
-
-	if (checked) {
-		std::cout << "check!" << std::endl;
-	}
-
-	if (check_mated) {
-		std::cout << "checkmate!" << std::endl;
-	}
 
 	if (m_selected_pos) {
 		const auto &from = *m_selected_pos;
@@ -314,6 +304,18 @@ static void update_selection()
 			// make the cpu do a move
 			const chess::Board after_cpu = chess::best_next_board(m_board, chess::Color::Black);
 			m_board = after_cpu;
+
+			// for now, report on new state here
+			const bool checked = chess::is_checked(m_board, m_current_player);
+			const bool check_mated = chess::is_check_mated(m_board, m_current_player);
+
+			if (checked) {
+				std::cout << "check!" << std::endl;
+			}
+
+			if (check_mated) {
+				std::cout << "checkmate!" << std::endl;
+			}
 		}
 
 		m_selected_pos = nullptr;
