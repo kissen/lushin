@@ -123,20 +123,6 @@ static void draw_filled_rectangle(uint8_t x, uint8_t y, const SDL_Color &color)
 	}
 }
 
-static void draw_rectangle(uint8_t x, uint8_t y, const SDL_Color &color)
-{
-	const SDL_Rect rectangle = {
-		x * CELL_DIM, y * CELL_DIM,
-		CELL_DIM, CELL_DIM
-	};
-
-	set_render_color(color);
-
-	if (SDL_RenderDrawRect(renderer, &rectangle)) {
-		fail_with_sdl_error();
-	}
-}
-
 static SDL_Color blend_average(const SDL_Color &color0, const SDL_Color &color1)
 {
 	const uint16_t r = static_cast<uint16_t>(color0.r) + static_cast<uint16_t>(color1.r);
@@ -418,15 +404,11 @@ static void draw_background()
 				color = blend_average(color, SDL_HIGHLIGHT);
 			}
 
-			// actual drawing
+			if (requires_selection && ((m_ticks /250) % 2)) {
+				color = blend_average(color, SDL_SELECTION);
+			}
 
 			draw_filled_rectangle(x, y, color);
-
-			if (requires_selection) {
-				if ((m_ticks / 250) % 2) {
-					draw_rectangle(x, y, SDL_SELECTION);
-				}
-			}
 		}
 
 		cellid += 1;
