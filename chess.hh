@@ -224,6 +224,12 @@ namespace chess
 	 * the game.
 	 */
 	bool is_check_mated(const Board &board, Color current_player);
+
+	/**
+	 * Score board from the point of view of current_player. The
+	 * higher the score, the better.
+	 */
+	int score(const Board &board, Color current_player);
 };
 
 //
