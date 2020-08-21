@@ -2,6 +2,7 @@
 #include <cassert>
 #include <climits>
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <signal.h>
 #include <stdexcept>
@@ -34,6 +35,9 @@ static uint32_t m_frame;
 
 /* ticks in ms since the start of the game */
 static uint32_t m_ticks;
+
+/* wheter we need to draw anything */
+static bool m_dirty;
 
 /* mouse state for the current frame */
 static struct {
@@ -246,6 +250,9 @@ void gui::begin()
 	// load in all assets into gpu memory
 	load_static_textures();
 
+	// ensure that we draw at least once
+	m_dirty = true;
+
 	// init game state
 	m_board = chess::Board::initial();
 	m_current_player = chess::Color::White;
@@ -257,8 +264,14 @@ static void update_time()
 	m_ticks = SDL_GetTicks();
 }
 
+static bool memeq(const void *buf0, const void *buf1, size_t n)
+{
+	return memcmp(buf0, buf1, n) == 0;
+}
+
 static void update_mouse_position()
 {
+	const auto m_mouse_bk = m_mouse;
 	const uint32_t mstate = SDL_GetMouseState(&m_mouse.x, &m_mouse.y);
 
 	const bool left_was_down = m_mouse.left_down;
@@ -269,6 +282,10 @@ static void update_mouse_position()
 
 	m_mouse.left_clicked = left_was_down && (! m_mouse.left_down);
 	m_mouse.right_clicked = right_was_down && (! m_mouse.right_down);
+
+	if (!memeq(&m_mouse_bk, &m_mouse, sizeof(m_mouse))) {
+		m_dirty = true;
+	}
 }
 
 static chess::Pos mouse_selection()
@@ -459,14 +476,18 @@ static void draw_pieces()
 
 void gui::draw()
 {
+	if (!m_dirty) {
+		return;
+	}
+
 	assert(window);
 
 	begin_drawing();
-
 	draw_background();
 	draw_pieces();
-
 	end_drawing();
+
+	m_dirty = false;
 }
 
 void gui::delay(int8_t fps)
