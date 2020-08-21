@@ -194,6 +194,12 @@ namespace chess
 	std::vector<Pos> valid_next_positions(const Board &board, const Pos &from);
 
 	/**
+	 * Return all possible follow up states for board when it is
+	 * current_players turn.
+	 */
+	std::vector<Board> valid_next_boards(const Board &board, Color current_player);
+
+	/**
 	 * Return wheter board is in a state of "checked" when it is
 	 * current_players turn.
 	 *
