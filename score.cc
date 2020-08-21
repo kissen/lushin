@@ -37,14 +37,10 @@ int chess::score(const Board &board, Color current_player)
 {
 	int accumulated = 0;
 
-	for (uint8_t x = 0; x < 8; ++x) {
-		for (uint8_t y = 0; y < 8; ++y) {
-			const Pos pos = {x, y};
-			const Piece &piece = board.at(pos);
-
-			accumulated += score_piece(piece, current_player);
-		}
-	}
+	board.for_each([&] (const Pos &pos, const Piece &piece) {
+		(void) pos;
+		accumulated += score_piece(piece, current_player);
+	});
 
 	return accumulated;
 }

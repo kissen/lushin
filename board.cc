@@ -39,6 +39,20 @@ const Piece &Board::at(const Pos &pos) const
 	return this->mboard.at(idx);
 }
 
+void Board::for_each(const std::function<void(const Pos &pos, const Piece &piece)> &f) const
+{
+	for (uint8_t x = 0; x < 8; ++x) {
+		for (uint8_t y = 0; y < 8; ++y) {
+			const Pos pos = {x, y};
+			const Piece &piece = this->at(pos);
+
+			if (piece.present) {
+				f(pos, piece);
+			}
+		}
+	}
+}
+
 std::optional<Piece> Board::move(const Pos &from, const Pos &to)
 {
 	const Piece capturer = this->at(from);

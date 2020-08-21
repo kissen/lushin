@@ -376,7 +376,7 @@ static void draw_background()
 
 	size_t cellid = 0;
 
-		for (uint8_t x = 0; x < 8; ++x) {
+	for (uint8_t x = 0; x < 8; ++x) {
 		for (uint8_t y = 0; y < 8; ++y) {
 			const size_t idx = cellid++ % 2;
 			SDL_Color color = background_colors[idx];

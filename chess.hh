@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <ostream>
 #include <vector>
@@ -165,6 +166,10 @@ namespace chess
 		 * Return a reference to the piece at pos.
 		 */
 		const Piece &at(const Pos &pos) const;
+		/**
+		 * Run f on each present piece on the board.
+		 */
+		void for_each(const std::function<void(const Pos &pos, const Piece &piece)> &f) const;
 
 		/**
 		 * Move piece from -> to. If a piece was captured, return
