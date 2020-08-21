@@ -17,6 +17,8 @@ namespace chess
 		White = 1
 	};
 
+	Color swap_color(Color color);
+
 	/**
 	 * The kind of family of a piece, e.g. King or Rook.
 	 */
@@ -198,6 +200,12 @@ namespace chess
 	 * current_players turn.
 	 */
 	std::vector<Board> valid_next_boards(const Board &board, Color current_player);
+
+	/**
+	 * Given a board, do a move on current_players behaf and
+	 * return the resulting state.
+	 */
+	Board best_next_board(const Board &board, Color current_player);
 
 	/**
 	 * Return wheter board is in a state of "checked" when it is

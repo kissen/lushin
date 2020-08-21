@@ -27,6 +27,7 @@ static SDL_Texture *textures[2][6];
 
 /* state of the game to display */
 static chess::Board m_board;
+static chess::Color m_current_player;
 
 /* number of the frame currently being rendered */
 static uint32_t m_frame;
@@ -261,6 +262,7 @@ void gui::begin()
 
 	// init game state
 	m_board = chess::Board::initial();
+	m_current_player = chess::Color::White;
 }
 
 static void update_time()
@@ -310,6 +312,11 @@ static void update_selection()
 			if (thrown) {
 				std::cout << "removed " << *thrown << std::endl;
 			}
+
+			// for now the human is always Color::White; so after a move
+			// make the cpu do a move
+			const chess::Board after_cpu = chess::best_next_board(m_board, chess::Color::Black);
+			m_board = after_cpu;
 		}
 
 		m_selected_pos = nullptr;
@@ -319,6 +326,10 @@ static void update_selection()
 		const chess::Piece &frame_piece_selection = m_board.at(frame_mouse_selection);
 
 		if (!frame_piece_selection.present) {
+			return;
+		}
+
+		if (frame_piece_selection.color != m_current_player) {
 			return;
 		}
 
