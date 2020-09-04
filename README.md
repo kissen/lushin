@@ -3,6 +3,9 @@ lushin
 
 A very rudimentary chess game I hacked together for fun. Named after
 [Aleksandr Ivanovich Luzhin](https://en.wikipedia.org/wiki/The_Defense).
+Please forgive the ugly pieces, I haven't looked for any pretty ones yet.
+
+![screenshot of lushin running on a Linux system](doc/screenshot.png)
 
 Dependencies and Building
 -------------------------
