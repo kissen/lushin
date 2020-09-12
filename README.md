@@ -3,7 +3,9 @@ lushin
 
 A very rudimentary chess game I hacked together for fun. Named after
 [Aleksandr Ivanovich Luzhin](https://en.wikipedia.org/wiki/The_Defense).
-Please forgive the ugly pieces, I haven't looked for any pretty ones yet.
+
+Please forgive the ugly looking pieces. The assets are awkwardly
+scaled and not really optimized for this use case.
 
 ![screenshot of lushin running on a Linux system](doc/screenshot.png)
 
@@ -18,3 +20,4 @@ Credit
 
 Art of the chest pieces in the public domain, taken from
 https://opengameart.org/content/chess-pieces-and-a-board.
+Thank you!
