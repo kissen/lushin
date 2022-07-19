@@ -1,3 +1,5 @@
+#include <ctime>
+
 #include "choice.hh"
 
 void choice::ensure_initialized()
