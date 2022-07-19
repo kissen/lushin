@@ -1,5 +1,5 @@
 CXXFLAGS += -std=c++17 -Wall -Wextra
-LDFLAGS += -lSDL2 -lSDL2_image
+LDLIBS += -lSDL2 -lSDL2_image
 
 objects = main.o piece.o pos.o kind.o color.o board.o \
 	valid_next_positions.o can_take_place_of.o gui.o \
@@ -12,7 +12,7 @@ assets = $(wildcard ./assets/*.png)
 all: lushin
 
 lushin: $(objects)
-	$(CXX) $(LDFLAGS) -o $@ $(objects)
+	$(CXX) $(LDFLAGS) -o $@ $(objects) $(LDLIBS)
 
 assets.o: $(assets) assets.hh
 	ld -r -b binary -o $@ $(assets)
